@@ -1,0 +1,35 @@
+//On program startup. Load the list on the right into memory, but not graphically.
+//When we iterate through the left list, we look for file paths that match one on the right list.
+//If we find one that matches, we add the executable on the left list to the one on the right (graphically). and remove it from the left (graphically).
+//On program close.
+//Serialize tracked programs to that same json.
+
+//As for keeping track of time...
+//Make .log files based on weeks, starting on that monday.
+//To do this... Figure out date and time.
+
+
+//Every time you open the program, check and see if there is a file that corresponds to the current week.
+//If there is not, make one.
+//If there is, check and see if there's a heading for the 
+//If we turn over from one day to the other, 
+
+//When you close the program...
+//Take the playtime from the day based on the app and serialize it into a .log file based on the...
+
+
+
+[[GAME: Team Fortress 2 (hl2.exe)]]
+TIME PLAYED:
+
+	Month of August 2021:
+
+		Week of 8/9/21:
+
+			8/12/21 (Thurs): 2 hours 5 minutes
+			8/14/21 (Fri): 
+
+
+
+
+FIX THE ANNOYING ERROR
