@@ -33,3 +33,11 @@ TIME PLAYED:
 
 
 FIX THE ANNOYING ERROR
+We need:
+-Context menu for "Unhide process" for hidden processes window
+-Context menu for "Untrack process" for tracked processes ListBox
+-Hidden processes menu
+----------------Labels for the listBoxes we already have
+-A way to resize the window
+-Make it so the tracked processes only appear if they're running
+-Deselect selected index if a listbox loses focus (easy)
