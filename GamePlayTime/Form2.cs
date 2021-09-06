@@ -32,7 +32,7 @@ namespace GamePlayTime
 
         private void HiddenProcessesBox_MouseDown(object sender, MouseEventArgs e)
         {
-            Form1.RightClickGenericListBox(sender, e, HiddenExecutableContextMenuStrip);
+            form1.RightClickGenericListBox(sender, e, HiddenExecutableContextMenuStrip);
         }
 
         public void CloseForm2ContextMenus()
@@ -49,7 +49,7 @@ namespace GamePlayTime
         {
             form1 = Application.OpenForms.OfType<Form1>().First();
             HiddenProcessesBox.Items.Clear();
-            Form1.AddListToListbox(HiddenProcessesBox, Form1.HiddenExecutable);
+            form1.AddListToListbox(HiddenProcessesBox, Form1.HiddenExecutable);
         }
     }
 }

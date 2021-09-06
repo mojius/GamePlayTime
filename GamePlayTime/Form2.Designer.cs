@@ -57,7 +57,7 @@ namespace GamePlayTime
             // unhideProcessToolStripMenuItem
             // 
             this.unhideProcessToolStripMenuItem.Name = "unhideProcessToolStripMenuItem";
-            this.unhideProcessToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
+            this.unhideProcessToolStripMenuItem.Size = new System.Drawing.Size(178, 24);
             this.unhideProcessToolStripMenuItem.Text = "Unhide Process";
             this.unhideProcessToolStripMenuItem.Click += new System.EventHandler(this.unhideProcessToolStripMenuItem_Click);
             // 
@@ -68,6 +68,7 @@ namespace GamePlayTime
             this.ClientSize = new System.Drawing.Size(338, 414);
             this.Controls.Add(this.HiddenProcessesBox);
             this.Name = "Form2";
+            this.ShowIcon = false;
             this.Text = "Hidden Processes";
             this.Load += new System.EventHandler(this.Form2_Load);
             this.HiddenExecutableContextMenuStrip.ResumeLayout(false);
