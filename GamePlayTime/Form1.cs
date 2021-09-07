@@ -8,6 +8,7 @@ using PInvoke;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Microsoft.Win32;
 
 namespace GamePlayTime
 {
@@ -15,17 +16,15 @@ namespace GamePlayTime
 
     public partial class Form1 : Form
     {
-
-        
-        string TrackedFileJsonPath { get; set; }
-        string HiddenFileJsonPath { get; set; }
-        static DateTime InitTime { get; set; }
+        private static string TrackedFileJsonPath { get; set; }
+        private static string HiddenFileJsonPath { get; set; }
 
         public static List<Executable> AllExecutable = new List<Executable>();
         public static List<Executable> TrackedExecutable = new List<Executable>();
         public static List<Executable> HiddenExecutable = new List<Executable>();
 
         bool usrPrf_showOfflineTrackedExecutables { get; set; } = true;
+        bool usrPrf_runOnStartUp { get; set; } = false;
 
         private Form2 form2;
 
@@ -36,26 +35,15 @@ namespace GamePlayTime
             public string WindowTitle { get; }
             public string ExecutableName { get; }
             public string Path { get; }
-            public KeyValueList DateandDuration { get; }
-
+            public KeyValueList DateAndDuration { get; }
             public Stopwatch session { get; set; } = new Stopwatch();
-
-
             public Executable(Process _process, string _windowTitle, string _executableName, string _path, KeyValueList _dateAndDuration = null)
             {
                 Process = _process;
                 WindowTitle = _windowTitle;
                 ExecutableName = _executableName;
                 Path = _path;
-                if (_dateAndDuration != null)
-                {
-                    DateandDuration = _dateAndDuration;
-                }
-                else
-                {
-                    DateandDuration = new KeyValueList();
-                }
-
+                DateAndDuration = (_dateAndDuration != null) ? _dateAndDuration : new KeyValueList();
             }
 
             public Executable(SerializationInfo info, StreamingContext context)
@@ -65,7 +53,7 @@ namespace GamePlayTime
                 ExecutableName = (string)info.GetValue("ExecutableName", typeof(string));
                 Path = (string)info.GetValue("Path", typeof(string));
                 var dnd = (KeyValueList)info.GetValue("DateAndDuration", typeof(KeyValueList));
-                DateandDuration = (dnd == null) ? dnd : new KeyValueList();
+                DateAndDuration = (dnd == null) ? dnd : new KeyValueList();
 
             }
 
@@ -77,9 +65,8 @@ namespace GamePlayTime
                 info.AddValue("WindowTitle", WindowTitle);
                 info.AddValue("ExecutableName", ExecutableName);
                 info.AddValue("Path", Path);
-                info.AddValue("DateAndDuration", DateandDuration);
+                info.AddValue("DateAndDuration", DateAndDuration);
             }
-
 
         }
 
@@ -87,44 +74,66 @@ namespace GamePlayTime
         {
             InitializeComponent();
             notifyIcon1.ContextMenuStrip = notifyIconContextMenuStrip;
-
             TrackedFileJsonPath = "trackedexe.json";
             HiddenFileJsonPath = "hiddenexe.json";
+            RegistryKey rk = Registry.CurrentUser.OpenSubKey
+                ("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+            runOnStartupToolStripMenuItem.Checked = (rk.GetValue("GamePlayTime") != null);
 
             ReadFromJson(TrackedFileJsonPath, out TrackedExecutable);
             ReadFromJson(HiddenFileJsonPath, out HiddenExecutable);
-
-
             RefreshAllWindows();
-
-
-
         }
 
-
-
-            
         private void timer1_Tick(object sender, EventArgs e)
         {
             RefreshAllWindows();
         }
 
-        //Find a way to minimize the app.
+        //
+        //
+        //UTILITY FUNCTIONS
+        //
+        //
 
-
-        private bool IsNotHidden(Executable ex)
+        private static void EnumDesktopWindows()
         {
-            return (!HiddenExecutable.Any(t => t.Path == ex.Path));
+            foreach (var proc in Process.GetProcesses())
+            {
+                if (proc.MainWindowHandle != null && User32.IsWindowVisible(proc.MainWindowHandle) && !string.IsNullOrEmpty(proc.MainWindowTitle) && !AllExecutable.Where(e => proc.MainWindowTitle == e.WindowTitle).Any())
+                {
+                    try
+                    {
+                        AllExecutable.Add(new Executable(proc, proc.MainWindowTitle, proc.MainModule.ModuleName, proc.MainModule.FileName));
+                    }
+                    catch (Exception e)
+                    {
+                        AllExecutable.Add(new Executable(proc, proc.MainWindowTitle, "path not available", "filename not available"));
+                    }
+                }
+
+            }
         }
-        
+
         //This function finds all the matching paths between the all-executable and tracked-executable list, and transfers processes if they need transferring.
         private void ReSortTracked()
         {
             for(int i = 0; i < AllExecutable.Count; i++)
             {
                 for (int j = 0; j < TrackedExecutable.Count; j++)
-                {
-                    if (AllExecutable[i].Path == TrackedExecutable[j].Path)
+                {   
+                    //First try to match exe paths, then if that fails, try to match window titles
+                    if (TrackedExecutable[j].Path != "path not available")
+                    {
+                        if (AllExecutable[i].Path == TrackedExecutable[j].Path)
+                        {
+                            TrackedExecutable[j].Process = AllExecutable[i].Process;
+                            AllExecutable.RemoveAt(i);
+                        }
+
+                    }
+                    else if (AllExecutable[i].WindowTitle == TrackedExecutable[j].WindowTitle)
                     {
                         TrackedExecutable[j].Process = AllExecutable[i].Process;
                         AllExecutable.RemoveAt(i);
@@ -139,35 +148,28 @@ namespace GamePlayTime
             TrackedExecutableContextMenuStrip.Close();
             if (form2 != null)
                 form2.CloseForm2ContextMenus();
-
         }
 
         public void RefreshAllWindows()
         {
             CloseContextMenus();
             AllExecutable.Clear();
-            AllProcessesBox.Items.Clear();
-            TrackedProcessesBox.Items.Clear();
             EnumDesktopWindows();
 
-            
             if (HiddenExecutable != null)
             {
-                AllExecutable = AllExecutable.Where(IsNotHidden).ToList();
+                AllExecutable = AllExecutable.Where(ex => !HiddenExecutable.Any(t => t.Path == ex.Path)).ToList();
             }
 
             ReSortTracked();
-
+            AllProcessesBox.Items.Clear();
+            TrackedProcessesBox.Items.Clear();
             AddListToListbox(AllProcessesBox, AllExecutable);
             AddListToListbox(TrackedProcessesBox, TrackedExecutable);
-
             ProcessTimeCheck();
-
         }
 
-
-
-        public static void ProcessTimeCheck()
+        private static void ProcessTimeCheck()
         {
             foreach (var tE in TrackedExecutable)
             {
@@ -185,29 +187,25 @@ namespace GamePlayTime
                             tE.session.Stop();
                             TimeSpan t = tE.session.Elapsed;
                             //Look for an existing key/value pair based on the current date and time. If there isn't one...
-                            KeyValuePair<DateTime, TimeSpan> kvTime = tE.DateandDuration.Find(kv => kv.Key.Date == DateTime.Today);
-                            if (tE.DateandDuration.Where(kv => kv.Key.Date == DateTime.Today).Any())
+                            KeyValuePair<DateTime, TimeSpan> kvTime = tE.DateAndDuration.Find(kv => kv.Key.Date == DateTime.Today);
+                            if (tE.DateAndDuration.Where(kv => kv.Key.Date == DateTime.Today).Any())
                             {
                                 var t2 = kvTime.Value.Add(t);
-                                tE.DateandDuration.Add(new KeyValuePair<DateTime, TimeSpan>(DateTime.Today, t2));
-                                tE.DateandDuration.Remove(kvTime);
+                                tE.DateAndDuration.Add(new KeyValuePair<DateTime, TimeSpan>(DateTime.Today, t2));
+                                tE.DateAndDuration.Remove(kvTime);
                             }
                             else 
                             {
                                 //Add the current time to whatever's in the value of kvTime.
-                                tE.DateandDuration.Add(new KeyValuePair<DateTime, TimeSpan>(DateTime.Today, t));
+                                tE.DateAndDuration.Add(new KeyValuePair<DateTime, TimeSpan>(DateTime.Today, t));
                             }
                             tE.session.Reset();
+                            LogToJson(TrackedFileJsonPath, TrackedExecutable);
                         }
                     }
-                    
                 }
-
-
-
             }
         }
-
 
         public void AddListToListbox(ListBox lB, List<Executable> lEx)
         {
@@ -228,50 +226,10 @@ namespace GamePlayTime
             lB.Items.AddRange(strings.ToArray());
         }
 
-
-        public static void EnumDesktopWindows()
-        {
-            User32.EnumDesktopWindows(User32.SafeDesktopHandle.Null, EnumCallback, IntPtr.Zero);
-        }
-
-        private static bool EnumCallback(IntPtr windowHandle, IntPtr lParam)
-        {
-            if (User32.IsWindowVisible(windowHandle))
-            {
-                User32.GetWindowThreadProcessId(windowHandle, out int pid);
-
-                try
-                {
-                    var process = Process.GetProcessById(pid);
-
-                    if (!string.IsNullOrWhiteSpace(process.MainWindowTitle) && !AllExecutable.Where(e => process.MainWindowTitle == e.WindowTitle).Any())
-                    {
-                        AllExecutable.Add(new Executable(process, process.MainWindowTitle, process.MainModule.ModuleName, process.MainModule.FileName));
-                        
-                    }
-                        
-                }
-                catch (Win32Exception w)
-                {
-                    MessageBox.Show(w.Message);
-                    Console.WriteLine(w.Message);
-                    Console.WriteLine(w.ErrorCode.ToString());
-                    Console.WriteLine(w.NativeErrorCode.ToString());
-                    Console.WriteLine(w.StackTrace);
-                    Console.WriteLine(w.Source);
-                    Exception e = w.GetBaseException();
-                    Console.WriteLine(e.Message);
-                }
-            }
-            return true;
-        }
-
-
         private void listBox1_MouseDown(object sender, MouseEventArgs e)
         {
             RightClickGenericListBox(sender, e, AllExecutableContextMenuStrip);
         }
-
 
         public void RightClickGenericListBox(object sender, MouseEventArgs e, ContextMenuStrip c)
         {
@@ -298,92 +256,9 @@ namespace GamePlayTime
 
                 if (focusedItem != null && listBox.SelectedIndex == cursorPointIndex && !(cursorPointIndex == -1) && listBox.SelectedIndex != -1)
                 {
-
                     c.Show(Cursor.Position);
                 }
             }
-        }
-
-        private void trackProcessToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var focusedItem = AllProcessesBox.SelectedItem;
-            var focusedIndex = AllProcessesBox.SelectedIndex;
-            var matchingItem = AllExecutable.ElementAt(focusedIndex);
-
-            AllProcessesBox.Items.Remove(focusedItem);
-            TrackedExecutable.Add(matchingItem);
-            AllExecutable.Remove(matchingItem);
-            TrackedProcessesBox.Items.Add(focusedItem);
-            Console.WriteLine("Just removed index " + focusedIndex + ", matching program " + matchingItem.ExecutableName);
-        }
-
-        private void hideProcessToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var focusedItem = AllProcessesBox.SelectedItem;
-            var focusedIndex = AllProcessesBox.SelectedIndex;
-            var matchingItem = AllExecutable.ElementAt(focusedIndex);
-
-            AllProcessesBox.Items.Remove(focusedItem);
-            HiddenExecutable.Add(matchingItem);
-
-            if (form2 != null)
-                form2.AddHiddenToList(focusedItem);
-
-            AllExecutable.Remove(matchingItem);
-            Console.WriteLine("Just removed index " + focusedIndex + ", matching program " + matchingItem.ExecutableName);
-            RefreshAllWindows();
-        }
-
-
-        private void LogToFile()
-        {
-
-
-
-        }
-
-        private void LogToJson(string filePath, List<Executable> list)
-        {
-
-            JsonSerializer js = new JsonSerializer();
-
-            //if (File.Exists(_filePath))
-            {
-                StreamWriter sw = new StreamWriter(filePath);
-                JsonWriter jsonWriter = new JsonTextWriter(sw);
-                jsonWriter.Formatting = Formatting.Indented;
-
-                js.Serialize(jsonWriter, list);
-                sw.Close();
-                jsonWriter.Close();
-            }
-            //https://www.youtube.com/watch?v=Ib3jnD158NI
-
-            //https://discord.com/channels/303217943234215948/311917081086001152/875477446248521728
-
-
-
-
-
-        }
-
-        private void ReadFromJson(string filePath, out List<Executable> list)
-        {
-            //check if file is empty
-            if (File.Exists(filePath) && File.ReadAllBytes(filePath).Length  != 0)
-            {
-                list = JsonConvert.DeserializeObject<List<Executable>>(File.ReadAllText(filePath)).ToList();
-                    
-            }
-            else
-            {
-                list = new List<Executable>();
-            }
-        }
-
-        private void Form1_MouseDown(object sender, MouseEventArgs e)
-        {
-            
         }
 
         private void TrackedProcessesBox_MouseDown(object sender, MouseEventArgs e)
@@ -403,20 +278,145 @@ namespace GamePlayTime
             lB.ClearSelected();
         }
 
-        private void stopTrackingProcessToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                if (form2 != null)
+                    form2.Hide();
+                Hide();
+            }
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            notifyIcon1.Visible = false;
+            timer1.Stop();
+            ProcessTimeCheck();
+            LogToJson(TrackedFileJsonPath, TrackedExecutable);
+            LogToJson(HiddenFileJsonPath, HiddenExecutable);
+            notifyIcon1.Visible = false;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            //notifyIcon1.BalloonTipText = "Application Minimized.";
+            //notifyIcon1.BalloonTipTitle = "Game Play Time";
+            //notifyIcon1.ShowBalloonTip(2000);
+        }
+        
+        private void notifyIcon1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                Show();
+            else if (e.Button == MouseButtons.Right)
+                notifyIcon1.ContextMenuStrip.Show();
+        }
+
+        private static void LogToJson(string filePath, List<Executable> list)
+        {
+            JsonSerializer js = new JsonSerializer();
+            if (!File.Exists(filePath))
+            {
+                var fs = File.Create(filePath);
+                fs.Close();
+            }
+
+            StreamWriter sw = new StreamWriter(filePath);
+            JsonWriter jsonWriter = new JsonTextWriter(sw);
+            jsonWriter.Formatting = Formatting.Indented;
+
+            js.Serialize(jsonWriter, list);
+            sw.Close();
+            jsonWriter.Close();
+        
+        }
+
+        private static void ReadFromJson(string filePath, out List<Executable> list)
+        {
+            if (File.Exists(filePath) && File.ReadAllBytes(filePath).Length != 0)
+            {
+                list = JsonConvert.DeserializeObject<List<Executable>>(File.ReadAllText(filePath)).ToList();
+            }
+            else
+            {
+                list = new List<Executable>();
+            }
+        }
+
+        private void TrackProcess()
+        {
+            var focusedItem = AllProcessesBox.SelectedItem;
+            var focusedIndex = AllProcessesBox.SelectedIndex;
+
+            if (focusedIndex != -1)
+            {
+                var matchingItem = AllExecutable.ElementAt(focusedIndex);
+                AllProcessesBox.Items.Remove(focusedItem);
+                TrackedExecutable.Add(matchingItem);
+                AllExecutable.Remove(matchingItem);
+                TrackedProcessesBox.Items.Add(focusedItem);
+                Console.WriteLine("Just removed index " + focusedIndex + ", matching program " + matchingItem.ExecutableName);
+            }
+        }
+
+        private void StopTrackingProcess()
         {
             var focusedItem = TrackedProcessesBox.SelectedItem;
             var focusedIndex = TrackedProcessesBox.SelectedIndex;
             var matchingItem = TrackedExecutable.ElementAt(focusedIndex);
 
-            if (matchingItem.Process != null & !matchingItem.Process.HasExited)
+
+            if (matchingItem.DateAndDuration.Count > 2)
             {
-                AllExecutable.Add(matchingItem);
-                AllProcessesBox.Items.Add(focusedItem);
+                DialogResult dr = MessageBox.Show(this, "The program you are un-tracking has 3 or more days on which it is tracked.\n" +
+                    "Untracking it will erase this history when you next close the program! Do you want to continue?", "Warning!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (dr == DialogResult.No)
+                    return;
+            }
+            //These are on separate lines because I can't get short-circuit evaluation to work.
+            if (matchingItem.Process != null)
+            {
+                if (!matchingItem.Process.HasExited)
+                {
+                    AllExecutable.Add(matchingItem);
+                    AllProcessesBox.Items.Add(focusedItem);
+                }
             }
             TrackedProcessesBox.Items.Remove(focusedItem);
             TrackedExecutable.Remove(matchingItem);
-            Console.WriteLine("Just removed index " + focusedIndex + ", matching program " + matchingItem.ExecutableName);
+        }
+
+        private void HideProcess()
+        {
+            var focusedItem = AllProcessesBox.SelectedItem;
+            var focusedIndex = AllProcessesBox.SelectedIndex;
+
+            if (focusedIndex != -1)
+            {
+                var matchingItem = AllExecutable.ElementAt(focusedIndex);
+
+                AllProcessesBox.Items.Remove(focusedItem);
+                HiddenExecutable.Add(matchingItem);
+
+                if (form2 != null)
+                    form2.AddHiddenToList(focusedItem);
+
+                AllExecutable.Remove(matchingItem);
+                Console.WriteLine("Just removed index " + focusedIndex + ", matching program " + matchingItem.ExecutableName);
+                RefreshAllWindows();
+            }
+        }
+
+        //
+        //
+        //TOOLSTRIP FUNCTIONS
+        //
+        //
+        private void stopTrackingProcessToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StopTrackingProcess();
         }
 
         private void showHiddenProcessesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -450,45 +450,6 @@ namespace GamePlayTime
             timer1.Stop();
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (e.CloseReason == CloseReason.UserClosing)
-            {
-                e.Cancel = true;
-                if (form2 != null)
-                    form2.Hide();
-
-                Hide();
-            }
-
-        }
-
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            notifyIcon1.Visible = false;
-            timer1.Stop();
-            ProcessTimeCheck();
-            LogToJson(TrackedFileJsonPath, TrackedExecutable);
-            LogToJson(HiddenFileJsonPath, HiddenExecutable);
-            notifyIcon1.Visible = false;
-
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            notifyIcon1.BalloonTipText = "Application Minimized.";
-            notifyIcon1.BalloonTipTitle = "Game Play Time";
-            notifyIcon1.ShowBalloonTip(2000);
-        }
-        
-        private void notifyIcon1_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-                Show();
-            else if (e.Button == MouseButtons.Right)
-                notifyIcon1.ContextMenuStrip.Show();
-        }
-
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Show();
@@ -501,17 +462,7 @@ namespace GamePlayTime
 
         private void showOfflineToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var contextMenu = (ToolStripMenuItem)TrackedExecutableContextMenuStrip2.Items[0];
-            if (contextMenu.Checked)
-            {
-                contextMenu.Checked = false;
-                usrPrf_showOfflineTrackedExecutables = false;
-            }
-            else if (!contextMenu.Checked)
-            {
-                contextMenu.Checked = true;
-                usrPrf_showOfflineTrackedExecutables = true;
-            }
+
         }
 
         private void OpenTrackedProcessesFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -533,8 +484,7 @@ namespace GamePlayTime
             {
                 HiddenFileJsonPath = path;
                 RefreshAllWindows();
-            }
-                
+            }    
         }
 
         private void exitToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -544,59 +494,68 @@ namespace GamePlayTime
 
         private void trackProcessToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            var focusedItem = AllProcessesBox.SelectedItem;
-            var focusedIndex = AllProcessesBox.SelectedIndex;
-
-            if (focusedIndex != -1)
-            {
-                var matchingItem = AllExecutable.ElementAt(focusedIndex);
-                AllProcessesBox.Items.Remove(focusedItem);
-                TrackedExecutable.Add(matchingItem);
-                AllExecutable.Remove(matchingItem);
-                TrackedProcessesBox.Items.Add(focusedItem);
-                Console.WriteLine("Just removed index " + focusedIndex + ", matching program " + matchingItem.ExecutableName);
-            }
-
+            TrackProcess();
         }
 
         private void hideProcessToolStripMenuItem2_Click(object sender, EventArgs e)
         {
-            var focusedItem = AllProcessesBox.SelectedItem;
-            var focusedIndex = AllProcessesBox.SelectedIndex;
+            HideProcess();
+        }
 
-            if (focusedIndex != -1)
-            {
-                var matchingItem = AllExecutable.ElementAt(focusedIndex);
+        private void trackProcessToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TrackProcess();
+        }
 
-                AllProcessesBox.Items.Remove(focusedItem);
-                HiddenExecutable.Add(matchingItem);
+        private void hideProcessToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            HideProcess();
+        }
 
-                if (form2 != null)
-                    form2.AddHiddenToList(focusedItem);
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Game Play Time v1.0\nCreated by @mojius on github :)", "About");
+        }
 
-                AllExecutable.Remove(matchingItem);
-                Console.WriteLine("Just removed index " + focusedIndex + ", matching program " + matchingItem.ExecutableName);
-                RefreshAllWindows();
-            }
+        private void runOnStartupToolStripMenuItem_CheckStateChanged(object sender, EventArgs e)
+        {
+            usrPrf_runOnStartUp = runOnStartupToolStripMenuItem.Checked;
 
+            RegistryKey rk = Registry.CurrentUser.OpenSubKey
+                ("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+            if (usrPrf_runOnStartUp ^ rk.GetValue("GamePlayTime") != null)
+                rk.SetValue("GamePlayTime", Application.ExecutablePath);
+            else
+                rk.DeleteValue("GamePlayTime", false);
+        }
+
+        private void showOfflineToolStripMenuItem_CheckStateChanged(object sender, EventArgs e)
+        {
+            usrPrf_showOfflineTrackedExecutables = showOfflineToolStripMenuItem.Checked;
+            RefreshAllWindows();
         }
     }
 }
 
+//--Make sure the dropdown menu and right-click menu operations are the same for tracking and untracking.--
+//Figure out some async shit.
+//Have someone test the program. 
+//--Get the program to run on startup. https://stackoverflow.com/questions/26465287/confirm-box-in-asp-net-web-form-application--
+//Optimize.
+//--Switch out the enumWindows stuff for Process functions.--
 
-//--Fix up the menustrip controls -- make them do stuff. (Almost done: gotta do the second menu stuff).--
-//Figure out how to handle a program if you remove it from the list of tracked processes.
+//--Fix up the menustrip controls -- make them do stuff.--
+//--Figure out how to handle a program if you remove it from the list of tracked processes.--
 //--Fix the icon not going away on close.--
 //--Fix the program failing to actually close.--
 //--Name the notify icon.--
 //--Fix the annoying shit with the dateTimes not working.--
 //--Add a control to show tracked but offline processes.--
 
+//LONGTERM
+//Make some kind of calendar to show the times.
+
 //Make opening and closing all forms stop/start the timer, and get rid of the controls that close the context menu windows.
 //https://foxlearn.com/windows-forms/minimize-application-to-system-tray-in-csharp-523.html
 //https://stackoverflow.com/questions/995195/how-can-i-make-a-net-windows-forms-application-that-only-runs-in-the-system-tra
-
-
-
-
-

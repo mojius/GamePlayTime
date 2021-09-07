@@ -45,11 +45,14 @@ namespace GamePlayTime
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openTrackedProcessesFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openHiddenProcessesFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.runOnStartupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.processesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trackProcessToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.hideProcessToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.showHiddenProcessesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.notifyIconContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,6 +61,7 @@ namespace GamePlayTime
             this.showOfflineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenTrackedProcessFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.OpenHiddenProcessFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.AllExecutableContextMenuStrip.SuspendLayout();
             this.TrackedExecutableContextMenuStrip.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -69,8 +73,9 @@ namespace GamePlayTime
             // 
             this.AllProcessesBox.CausesValidation = false;
             this.AllProcessesBox.FormattingEnabled = true;
+            this.AllProcessesBox.HorizontalScrollbar = true;
             this.AllProcessesBox.ItemHeight = 16;
-            this.AllProcessesBox.Location = new System.Drawing.Point(16, 79);
+            this.AllProcessesBox.Location = new System.Drawing.Point(13, 47);
             this.AllProcessesBox.Margin = new System.Windows.Forms.Padding(4);
             this.AllProcessesBox.MaximumSize = new System.Drawing.Size(333, 388);
             this.AllProcessesBox.MinimumSize = new System.Drawing.Size(333, 48);
@@ -113,8 +118,9 @@ namespace GamePlayTime
             // TrackedProcessesBox
             // 
             this.TrackedProcessesBox.FormattingEnabled = true;
+            this.TrackedProcessesBox.HorizontalScrollbar = true;
             this.TrackedProcessesBox.ItemHeight = 16;
-            this.TrackedProcessesBox.Location = new System.Drawing.Point(359, 79);
+            this.TrackedProcessesBox.Location = new System.Drawing.Point(356, 47);
             this.TrackedProcessesBox.Margin = new System.Windows.Forms.Padding(4);
             this.TrackedProcessesBox.MaximumSize = new System.Drawing.Size(333, 388);
             this.TrackedProcessesBox.MinimumSize = new System.Drawing.Size(333, 48);
@@ -144,7 +150,7 @@ namespace GamePlayTime
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(12, 58);
+            this.label1.Location = new System.Drawing.Point(9, 26);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(106, 17);
             this.label1.TabIndex = 2;
@@ -154,7 +160,7 @@ namespace GamePlayTime
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(356, 58);
+            this.label2.Location = new System.Drawing.Point(353, 26);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(147, 17);
             this.label2.TabIndex = 3;
@@ -165,7 +171,8 @@ namespace GamePlayTime
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.processesToolStripMenuItem});
+            this.processesToolStripMenuItem,
+            this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(707, 28);
@@ -174,10 +181,13 @@ namespace GamePlayTime
             // 
             // fileToolStripMenuItem
             // 
+            this.fileToolStripMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openTrackedProcessesFileToolStripMenuItem,
             this.openHiddenProcessesFileToolStripMenuItem,
+            this.runOnStartupToolStripMenuItem,
             this.exitToolStripMenuItem1});
+            this.fileToolStripMenuItem.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(46, 24);
             this.fileToolStripMenuItem.Text = "File";
@@ -186,6 +196,7 @@ namespace GamePlayTime
             // 
             // openTrackedProcessesFileToolStripMenuItem
             // 
+            this.openTrackedProcessesFileToolStripMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.openTrackedProcessesFileToolStripMenuItem.Name = "openTrackedProcessesFileToolStripMenuItem";
             this.openTrackedProcessesFileToolStripMenuItem.Size = new System.Drawing.Size(286, 26);
             this.openTrackedProcessesFileToolStripMenuItem.Text = "Open Tracked Processes File...";
@@ -197,6 +208,14 @@ namespace GamePlayTime
             this.openHiddenProcessesFileToolStripMenuItem.Size = new System.Drawing.Size(286, 26);
             this.openHiddenProcessesFileToolStripMenuItem.Text = "Open Hidden Processes File...";
             this.openHiddenProcessesFileToolStripMenuItem.Click += new System.EventHandler(this.OpenHiddenProcessesFileToolStripMenuItem_Click);
+            // 
+            // runOnStartupToolStripMenuItem
+            // 
+            this.runOnStartupToolStripMenuItem.CheckOnClick = true;
+            this.runOnStartupToolStripMenuItem.Name = "runOnStartupToolStripMenuItem";
+            this.runOnStartupToolStripMenuItem.Size = new System.Drawing.Size(286, 26);
+            this.runOnStartupToolStripMenuItem.Text = "Run On Startup";
+            this.runOnStartupToolStripMenuItem.CheckStateChanged += new System.EventHandler(this.runOnStartupToolStripMenuItem_CheckStateChanged);
             // 
             // exitToolStripMenuItem1
             // 
@@ -237,6 +256,21 @@ namespace GamePlayTime
             this.showHiddenProcessesToolStripMenuItem.Size = new System.Drawing.Size(257, 26);
             this.showHiddenProcessesToolStripMenuItem.Text = "Show Hidden Processes...";
             this.showHiddenProcessesToolStripMenuItem.Click += new System.EventHandler(this.showHiddenProcessesToolStripMenuItem_Click);
+            // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(55, 24);
+            this.helpToolStripMenuItem.Text = "Help";
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
+            this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // notifyIcon1
             // 
@@ -283,6 +317,7 @@ namespace GamePlayTime
             this.showOfflineToolStripMenuItem.Name = "showOfflineToolStripMenuItem";
             this.showOfflineToolStripMenuItem.Size = new System.Drawing.Size(285, 26);
             this.showOfflineToolStripMenuItem.Text = "Show Offline Tracked Processes";
+            this.showOfflineToolStripMenuItem.CheckStateChanged += new System.EventHandler(this.showOfflineToolStripMenuItem_CheckStateChanged);
             this.showOfflineToolStripMenuItem.Click += new System.EventHandler(this.showOfflineToolStripMenuItem_Click);
             // 
             // OpenTrackedProcessFileDialog
@@ -299,7 +334,8 @@ namespace GamePlayTime
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(707, 480);
+            this.AutoSize = true;
+            this.ClientSize = new System.Drawing.Size(707, 447);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.menuStrip1);
@@ -309,11 +345,11 @@ namespace GamePlayTime
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Game Play Time";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
-            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
             this.AllExecutableContextMenuStrip.ResumeLayout(false);
             this.TrackedExecutableContextMenuStrip.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
@@ -354,6 +390,10 @@ namespace GamePlayTime
         private System.Windows.Forms.OpenFileDialog OpenTrackedProcessFileDialog;
         private System.Windows.Forms.OpenFileDialog OpenHiddenProcessFileDialog;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem runOnStartupToolStripMenuItem;
+        private System.Windows.Forms.ColorDialog colorDialog1;
     }
 }
 
