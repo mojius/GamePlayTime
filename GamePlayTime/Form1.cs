@@ -27,6 +27,7 @@ namespace GamePlayTime
         bool usrPrf_runOnStartUp { get; set; } = false;
 
         private Form2 form2;
+        private Form3 form3;
 
         [Serializable()]
         public class Executable : ISerializable
@@ -54,7 +55,6 @@ namespace GamePlayTime
                 Path = (string)info.GetValue("Path", typeof(string));
                 var dnd = (KeyValueList)info.GetValue("DateAndDuration", typeof(KeyValueList));
                 DateAndDuration = (dnd == null) ? dnd : new KeyValueList();
-
             }
 
             //Our serialization function. Stores object data in a file.
@@ -131,7 +131,6 @@ namespace GamePlayTime
                             TrackedExecutable[j].Process = AllExecutable[i].Process;
                             AllExecutable.RemoveAt(i);
                         }
-
                     }
                     else if (AllExecutable[i].WindowTitle == TrackedExecutable[j].WindowTitle)
                     {
@@ -535,23 +534,18 @@ namespace GamePlayTime
             usrPrf_showOfflineTrackedExecutables = showOfflineToolStripMenuItem.Checked;
             RefreshAllWindows();
         }
+
+        private void viewActivityCalendarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            form3 = new Form3();
+            form3.Show();
+        }
     }
 }
 
-//--Make sure the dropdown menu and right-click menu operations are the same for tracking and untracking.--
 //Figure out some async shit.
 //Have someone test the program. 
-//--Get the program to run on startup. https://stackoverflow.com/questions/26465287/confirm-box-in-asp-net-web-form-application--
 //Optimize.
-//--Switch out the enumWindows stuff for Process functions.--
-
-//--Fix up the menustrip controls -- make them do stuff.--
-//--Figure out how to handle a program if you remove it from the list of tracked processes.--
-//--Fix the icon not going away on close.--
-//--Fix the program failing to actually close.--
-//--Name the notify icon.--
-//--Fix the annoying shit with the dateTimes not working.--
-//--Add a control to show tracked but offline processes.--
 
 //LONGTERM
 //Make some kind of calendar to show the times.

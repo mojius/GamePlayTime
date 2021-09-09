@@ -62,6 +62,8 @@ namespace GamePlayTime
             this.OpenTrackedProcessFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.OpenHiddenProcessFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewActivityCalendarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.AllExecutableContextMenuStrip.SuspendLayout();
             this.TrackedExecutableContextMenuStrip.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -172,10 +174,11 @@ namespace GamePlayTime
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.processesToolStripMenuItem,
-            this.helpToolStripMenuItem});
+            this.helpToolStripMenuItem,
+            this.viewToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(707, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(707, 30);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -240,14 +243,14 @@ namespace GamePlayTime
             // 
             this.trackProcessToolStripMenuItem1.Name = "trackProcessToolStripMenuItem1";
             this.trackProcessToolStripMenuItem1.Size = new System.Drawing.Size(257, 26);
-            this.trackProcessToolStripMenuItem1.Text = "Track Process";
+            this.trackProcessToolStripMenuItem1.Text = "Track Process...";
             this.trackProcessToolStripMenuItem1.Click += new System.EventHandler(this.trackProcessToolStripMenuItem1_Click);
             // 
             // hideProcessToolStripMenuItem2
             // 
             this.hideProcessToolStripMenuItem2.Name = "hideProcessToolStripMenuItem2";
             this.hideProcessToolStripMenuItem2.Size = new System.Drawing.Size(257, 26);
-            this.hideProcessToolStripMenuItem2.Text = "Hide Process";
+            this.hideProcessToolStripMenuItem2.Text = "Hide Process...";
             this.hideProcessToolStripMenuItem2.Click += new System.EventHandler(this.hideProcessToolStripMenuItem2_Click);
             // 
             // showHiddenProcessesToolStripMenuItem
@@ -330,6 +333,21 @@ namespace GamePlayTime
             this.OpenHiddenProcessFileDialog.FileName = "hiddenexe.json";
             this.OpenHiddenProcessFileDialog.Title = "Open Hidden Processes File (.json)...";
             // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.viewActivityCalendarToolStripMenuItem});
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(55, 26);
+            this.viewToolStripMenuItem.Text = "View";
+            // 
+            // viewActivityCalendarToolStripMenuItem
+            // 
+            this.viewActivityCalendarToolStripMenuItem.Name = "viewActivityCalendarToolStripMenuItem";
+            this.viewActivityCalendarToolStripMenuItem.Size = new System.Drawing.Size(249, 26);
+            this.viewActivityCalendarToolStripMenuItem.Text = "View Activity Calendar...";
+            this.viewActivityCalendarToolStripMenuItem.Click += new System.EventHandler(this.viewActivityCalendarToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -394,6 +412,8 @@ namespace GamePlayTime
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem runOnStartupToolStripMenuItem;
         private System.Windows.Forms.ColorDialog colorDialog1;
+        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewActivityCalendarToolStripMenuItem;
     }
 }
 
