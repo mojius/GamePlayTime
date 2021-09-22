@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GamePlayTime
@@ -18,26 +12,40 @@ namespace GamePlayTime
             InitializeComponent();
         }
 
-        private void playTimeCalendar_DateSelected(object sender, DateRangeEventArgs e)
+        private void Form3_Load(object sender, EventArgs e)
         {
-            if (e.Start.Date == e.End.Date)
-            {            
+            form1 = Application.OpenForms.OfType<Form1>().First();
+            UpdateCalendarDate();
+        }
+
+        private void playTimeCalendar_DateChanged(object sender, DateRangeEventArgs e)
+        {
+            UpdateCalendarDate();
+        }
+
+        public void UpdateCalendarDate()
+        {
+            activityLogLabel1.Text = "";
+            if (playTimeCalendar.SelectionStart.Date == playTimeCalendar.SelectionEnd.Date)
+            {
                 foreach (var ex in Form1.TrackedExecutable)
                 {
                     foreach (var dt in ex.DateAndDuration)
                     {
-                        if (e.Start == dt.Key)
+                        if (playTimeCalendar.SelectionStart == dt.Key)
                         {
-                            activityLogLabel1.Text += string.Format("{0}: {1}\n", ex.WindowTitle, dt.Value.ToString());
+                            string s = "";
+                            if (dt.Value.Hours != 0)
+                                s += string.Format("{0} hours\n", dt.Value.Hours);
+                            if (dt.Value.Minutes != 0)
+                                s += string.Format("{0} minutes\n", dt.Value.Minutes);
+                            if (dt.Value.Seconds != 0)
+                                s += string.Format("{0} seconds\n", dt.Value.Seconds);
+                            activityLogLabel1.Text += string.Format("{0}:\n{1}", ex.WindowTitle, s);
                         }
                     }
                 }
             }
-        }
-
-        private void Form3_Load(object sender, EventArgs e)
-        {
-            form1 = Application.OpenForms.OfType<Form1>().First();
         }
     }
 }

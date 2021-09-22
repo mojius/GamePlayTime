@@ -54,7 +54,7 @@ namespace GamePlayTime
                 ExecutableName = (string)info.GetValue("ExecutableName", typeof(string));
                 Path = (string)info.GetValue("Path", typeof(string));
                 var dnd = (KeyValueList)info.GetValue("DateAndDuration", typeof(KeyValueList));
-                DateAndDuration = (dnd == null) ? dnd : new KeyValueList();
+                DateAndDuration = (dnd != null) ? dnd : new KeyValueList();
             }
 
             //Our serialization function. Stores object data in a file.
@@ -166,41 +166,42 @@ namespace GamePlayTime
             AddListToListbox(AllProcessesBox, AllExecutable);
             AddListToListbox(TrackedProcessesBox, TrackedExecutable);
             ProcessTimeCheck();
+            if (form3 != null)
+                form3.UpdateCalendarDate();
+
+                
         }
 
         private static void ProcessTimeCheck()
         {
             foreach (var tE in TrackedExecutable)
             {
-                foreach (var aE in AllExecutable)
+                if (tE.Process != null)
                 {
-                    if (tE.Process != null)
+                    //If the process has not exited, and the stopwatch hasn't started, then start it.
+                    if (!tE.Process.HasExited && !tE.session.IsRunning)
                     {
-                        //If the process has not exited, and the stopwatch hasn't started, then start it.
-                        if (!tE.Process.HasExited && !tE.session.IsRunning)
+                        tE.session.Start();
+                    }
+                    else if (tE.Process.HasExited && tE.session.IsRunning)
+                    {
+                        tE.session.Stop();
+                        TimeSpan t = tE.session.Elapsed;
+                        //Look for an existing key/value pair based on the current date and time. If there isn't one...
+                        KeyValuePair<DateTime, TimeSpan> kvTime = tE.DateAndDuration.Find(kv => kv.Key.Date == DateTime.Today);
+                        if (tE.DateAndDuration.Where(kv => kv.Key.Date == DateTime.Today).Any())
                         {
-                            tE.session.Start();
+                            var t2 = kvTime.Value.Add(t);
+                            tE.DateAndDuration.Add(new KeyValuePair<DateTime, TimeSpan>(DateTime.Today, t2));
+                            tE.DateAndDuration.Remove(kvTime);
                         }
-                        else if (tE.Process.HasExited && tE.session.IsRunning)
+                        else 
                         {
-                            tE.session.Stop();
-                            TimeSpan t = tE.session.Elapsed;
-                            //Look for an existing key/value pair based on the current date and time. If there isn't one...
-                            KeyValuePair<DateTime, TimeSpan> kvTime = tE.DateAndDuration.Find(kv => kv.Key.Date == DateTime.Today);
-                            if (tE.DateAndDuration.Where(kv => kv.Key.Date == DateTime.Today).Any())
-                            {
-                                var t2 = kvTime.Value.Add(t);
-                                tE.DateAndDuration.Add(new KeyValuePair<DateTime, TimeSpan>(DateTime.Today, t2));
-                                tE.DateAndDuration.Remove(kvTime);
-                            }
-                            else 
-                            {
-                                //Add the current time to whatever's in the value of kvTime.
-                                tE.DateAndDuration.Add(new KeyValuePair<DateTime, TimeSpan>(DateTime.Today, t));
-                            }
-                            tE.session.Reset();
-                            LogToJson(TrackedFileJsonPath, TrackedExecutable);
+                            //Add the current time to whatever's in the value of kvTime.
+                            tE.DateAndDuration.Add(new KeyValuePair<DateTime, TimeSpan>(DateTime.Today, t));
                         }
+                        tE.session.Reset();
+                        LogToJson(TrackedFileJsonPath, TrackedExecutable);
                     }
                 }
             }
@@ -334,14 +335,21 @@ namespace GamePlayTime
 
         private static void ReadFromJson(string filePath, out List<Executable> list)
         {
-            if (File.Exists(filePath) && File.ReadAllBytes(filePath).Length != 0)
+            if (File.Exists(filePath))
             {
-                list = JsonConvert.DeserializeObject<List<Executable>>(File.ReadAllText(filePath)).ToList();
+                StreamReader sr = new StreamReader(filePath);
+                JsonReader jr = new JsonTextReader(sr);
+                JsonSerializer js = new JsonSerializer();
+                list = (List<Executable>)js.Deserialize(jr, typeof(List<Executable>));
+                if (list == null) list = new List<Executable>();
+
             }
             else
             {
+                File.Create(filePath);
                 list = new List<Executable>();
             }
+
         }
 
         private void TrackProcess()
@@ -366,7 +374,7 @@ namespace GamePlayTime
             var focusedIndex = TrackedProcessesBox.SelectedIndex;
             var matchingItem = TrackedExecutable.ElementAt(focusedIndex);
 
-
+            
             if (matchingItem.DateAndDuration.Count > 2)
             {
                 DialogResult dr = MessageBox.Show(this, "The program you are un-tracking has 3 or more days on which it is tracked.\n" +
@@ -546,6 +554,7 @@ namespace GamePlayTime
 //Figure out some async shit.
 //Have someone test the program. 
 //Optimize.
+//https://stackoverflow.com/questions/972039/is-there-a-system-event-when-processes-are-created
 
 //LONGTERM
 //Make some kind of calendar to show the times.
