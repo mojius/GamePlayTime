@@ -7,23 +7,11 @@ namespace GamePlayTime
 {
     public partial class Form3 : Form
     {
-        private Form1 form1;
         private List<Label> labels = new List<Label>();
-        public Form3()
-        {
-            InitializeComponent();
-        }
+        public Form3() => InitializeComponent();
+        private void Form3_Load(object sender, EventArgs e) => UpdateCalendarDate();
+        private void PlayTimeCalendar_DateChanged(object sender, DateRangeEventArgs e) => UpdateCalendarDate();
 
-        private void Form3_Load(object sender, EventArgs e)
-        {
-            form1 = Application.OpenForms.OfType<Form1>().First();
-            UpdateCalendarDate();
-        }
-
-        private void playTimeCalendar_DateChanged(object sender, DateRangeEventArgs e)
-        {
-            UpdateCalendarDate();
-        }
 
         public void UpdateCalendarDate()
         {
@@ -38,15 +26,19 @@ namespace GamePlayTime
                         if (playTimeCalendar.SelectionStart == dt.Key)
                         {
                             string s = "";
-                            Label l = new Label();
-                            l.AutoSize = true;
-                            l.Parent = activityLogPanel1;
-                            System.Drawing.Point p = new System.Drawing.Point();
-                            //Okay, so if this label is not the first label in the list, then put it 14 pixels after
-                            //the position of the LAST label in the index
-                            //Otherwise, just put it 14 pixels down 
-                            p.Y = (labels.Count == 0 ? 14 : labels.Last().Location.Y + labels.Last().Size.Height + 14);
-                            p.X = 14;
+                            Label l = new Label
+                            {
+                                AutoSize = true,
+                                Parent = activityLogPanel1
+                            };
+                            System.Drawing.Point p = new System.Drawing.Point
+                            {
+                                //Okay, so if this label is not the first label in the list, then put it 14 pixels after
+                                //the position of the LAST label in the index
+                                //Otherwise, just put it 14 pixels down 
+                                Y = (labels.Count == 0 ? 14 : labels.Last().Location.Y + labels.Last().Size.Height + 14),
+                                X = 14
+                            };
                             l.Location = p;
 
                             if (dt.Value.Hours != 0) s += string.Format("{0} hours\n", dt.Value.Hours);

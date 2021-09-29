@@ -66,8 +66,7 @@
     <StartupObject>GamePlayTime.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>
-    </ApplicationIcon>
+    <ApplicationIcon>Starvingartist-Antiseptic-Videogame-Nintendo-game-boy.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -196,7 +195,6 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.manifest" />
-    <None Include="GamePlayTime_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -225,6 +223,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="res\Starvingartist-Antiseptic-Videogame-Nintendo-game-boy.ico" />
+    <Content Include="Starvingartist-Antiseptic-Videogame-Nintendo-game-boy.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

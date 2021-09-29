@@ -43,7 +43,7 @@ namespace GamePlayTime
             this.playTimeCalendar.Name = "playTimeCalendar";
             this.playTimeCalendar.ShowToday = false;
             this.playTimeCalendar.TabIndex = 0;
-            this.playTimeCalendar.DateChanged += new System.Windows.Forms.DateRangeEventHandler(this.playTimeCalendar_DateChanged);
+            this.playTimeCalendar.DateChanged += new System.Windows.Forms.DateRangeEventHandler(this.PlayTimeCalendar_DateChanged);
             // 
             // activityLogPanel1
             // 

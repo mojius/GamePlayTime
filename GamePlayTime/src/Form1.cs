@@ -23,8 +23,8 @@ namespace GamePlayTime
         public static List<Executable> TrackedExecutable = new List<Executable>();
         public static List<Executable> HiddenExecutable = new List<Executable>();
 
-        bool usrPrf_showOfflineTrackedExecutables { get; set; } = true;
-        bool usrPrf_runOnStartUp { get; set; } = false;
+        private bool UsrPrf_showOfflineTrackedExecutables { get; set; } = true;
+        private bool UsrPrf_runOnStartUp { get; set; } = false;
 
         private Form2 form2;
         private Form3 form3;
@@ -37,7 +37,7 @@ namespace GamePlayTime
             public string ExecutableName { get; }
             public string Path { get; }
             public KeyValueList DateAndDuration { get; }
-            public Stopwatch session { get; set; } = new Stopwatch();
+            public Stopwatch Session { get; set; } = new Stopwatch();
             public Executable(Process _process, string _windowTitle, string _executableName, string _path, KeyValueList _dateAndDuration = null)
             {
                 Process = _process;
@@ -57,9 +57,6 @@ namespace GamePlayTime
                 DateAndDuration = (dnd != null) ? dnd : new KeyValueList();
             }
 
-            //Our serialization function. Stores object data in a file.
-            //Serialization info holds key-value pairs for the data.
-            //StreamingContext is used to hold additional information.
             public void GetObjectData(SerializationInfo info, StreamingContext context)
             {
                 info.AddValue("WindowTitle", WindowTitle);
@@ -85,10 +82,7 @@ namespace GamePlayTime
             RefreshAllWindows();
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            RefreshAllWindows();
-        }
+        private void Timer1_Tick(object sender, EventArgs e) => RefreshAllWindows();
 
         //
         //
@@ -188,20 +182,20 @@ namespace GamePlayTime
                     //If the stopwatch hasn't started...
                     //Has the process exited? If it has, then don't start the stopwatch.
                     //If it hasn't, start the stopwatch.
-                    if (!tE.session.IsRunning)
+                    if (!tE.Session.IsRunning)
                     {
                         if (tE.Process.HasExited) continue;
-                        else tE.session.Start();
+                        else tE.Session.Start();
                         return;
                     }
                     //If the stopwatch has started...
                     //Has the process exited? if it has, then stop the stopwatch.
                     //Update the keyvalue stuff.
-                    else if (tE.session.IsRunning)
+                    else if (tE.Session.IsRunning)
                     {
-                        if (tE.Process.HasExited) tE.session.Reset();
+                        if (tE.Process.HasExited) tE.Session.Reset();
                         
-                        TimeSpan t = tE.session.Elapsed;
+                        TimeSpan t = tE.Session.Elapsed;
                         //Look for an existing key/value pair based on the current date and time. If there isn't one...
                         KeyValuePair<DateTime, TimeSpan> kvTime = tE.DateAndDuration.Find(kv => kv.Key.Date == DateTime.Today);
                         if (tE.DateAndDuration.Where(kv => kv.Key.Date == DateTime.Today).Any())
@@ -215,7 +209,7 @@ namespace GamePlayTime
                             //Add the current time to whatever's in the value of kvTime.
                             tE.DateAndDuration.Add(new KeyValuePair<DateTime, TimeSpan>(DateTime.Today, t));
                         }
-                        tE.session.Restart();
+                        tE.Session.Restart();
                         
                     }
 
@@ -230,22 +224,19 @@ namespace GamePlayTime
             {
                 if (exe.Process != null)
                 {
-                    if (exe.Process.HasExited && usrPrf_showOfflineTrackedExecutables)
+                    if (exe.Process.HasExited && UsrPrf_showOfflineTrackedExecutables)
                         strings.Add(exe.WindowTitle + " (" + exe.ExecutableName + ") {Offline}");
                     else if (!exe.Process.HasExited)
                         strings.Add(exe.WindowTitle + " (" + exe.ExecutableName + ")");
                 }
-                else if (usrPrf_showOfflineTrackedExecutables)
+                else if (UsrPrf_showOfflineTrackedExecutables)
                     strings.Add(exe.WindowTitle + " (" + exe.ExecutableName + ") {Offline}");
 
             }
             lB.Items.AddRange(strings.ToArray());
         }
 
-        private void listBox1_MouseDown(object sender, MouseEventArgs e)
-        {
-            RightClickGenericListBox(sender, e, AllExecutableContextMenuStrip);
-        }
+        private void ListBox1_MouseDown(object sender, MouseEventArgs e) => RightClickGenericListBox(sender, e, AllExecutableContextMenuStrip);
 
         public void RightClickGenericListBox(object sender, MouseEventArgs e, ContextMenuStrip c)
         {
@@ -272,10 +263,7 @@ namespace GamePlayTime
             }
         }
 
-        private void TrackedProcessesBox_MouseDown(object sender, MouseEventArgs e)
-        {
-            RightClickGenericListBox(sender, e, TrackedExecutableContextMenuStrip);
-        }
+        private void TrackedProcessesBox_MouseDown(object sender, MouseEventArgs e) => RightClickGenericListBox(sender, e, TrackedExecutableContextMenuStrip);
 
         private void AllProcessesBox_Leave(object sender, EventArgs e)
         {
@@ -306,18 +294,8 @@ namespace GamePlayTime
             LogToJson(HiddenFileJsonPath, HiddenExecutable);
             notifyIcon1.Visible = false;
         }
-
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
-        {
-
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
         
-        private void notifyIcon1_MouseClick(object sender, MouseEventArgs e)
+        private void NotifyIcon1_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
                 Show();
@@ -327,20 +305,26 @@ namespace GamePlayTime
 
         private static void LogToJson(string filePath, List<Executable> list)
         {
-            JsonSerializer js = new JsonSerializer();
-            if (!File.Exists(filePath))
+            if (!IsFileInUse(filePath))
             {
-                var fs = File.Create(filePath);
-                fs.Close();
+                JsonSerializer js = new JsonSerializer();
+                if (!File.Exists(filePath))
+                {
+                    var fs = File.Create(filePath);
+                    fs.Close();
+                }
+
+                StreamWriter sw = new StreamWriter(filePath);
+                JsonWriter jsonWriter = new JsonTextWriter(sw)
+                {
+                    Formatting = Formatting.Indented
+                };
+
+                js.Serialize(jsonWriter, list);
+                sw.Close();
+                jsonWriter.Close();
             }
-
-            StreamWriter sw = new StreamWriter(filePath);
-            JsonWriter jsonWriter = new JsonTextWriter(sw);
-            jsonWriter.Formatting = Formatting.Indented;
-
-            js.Serialize(jsonWriter, list);
-            sw.Close();
-            jsonWriter.Close();
+            
         
         }
 
@@ -361,6 +345,24 @@ namespace GamePlayTime
                 list = new List<Executable>();
             }
 
+        }
+
+        private static bool IsFileInUse(string filePath)
+        {
+            FileStream stream = null;
+            try
+            {
+                stream = File.Open(filePath, FileMode.Open);
+            }
+            catch (IOException)
+            {
+                return true;
+            }
+            finally
+            {
+                if (stream != null) stream.Close();
+            }
+            return false;
         }
 
         private void TrackProcess()
@@ -385,7 +387,6 @@ namespace GamePlayTime
             var focusedIndex = TrackedProcessesBox.SelectedIndex;
             var matchingItem = TrackedExecutable.ElementAt(focusedIndex);
 
-            
             if (matchingItem.DateAndDuration.Count > 2)
             {
                 DialogResult dr = MessageBox.Show(this, "The program you are un-tracking has 3 or more days on which it is tracked.\n" +
@@ -432,55 +433,24 @@ namespace GamePlayTime
         //TOOLSTRIP FUNCTIONS
         //
         //
-        private void stopTrackingProcessToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            StopTrackingProcess();
-        }
-
-        private void showHiddenProcessesToolStripMenuItem_Click(object sender, EventArgs e)
+        private void StopTrackingProcessToolStripMenuItem_Click(object sender, EventArgs e) => StopTrackingProcess();
+        private void FileToolStripMenuItem_Click(object sender, EventArgs e) => timer1.Stop();
+        private void FileToolStripMenuItem_DropDownClosed(object sender, EventArgs e) => timer1.Start();
+        private void ProcessesToolStripMenuItem_DropDownClosed(object sender, EventArgs e) => timer1.Start();
+        private void ProcessesToolStripMenuItem_DropDownOpening(object sender, EventArgs e) => timer1.Stop();
+        private void FileToolStripMenuItem_DropDownOpening(object sender, EventArgs e) => timer1.Stop();
+        private void OpenToolStripMenuItem_Click(object sender, EventArgs e) => Show();
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e) => Application.Exit();
+        private void ExitToolStripMenuItem1_Click(object sender, EventArgs e) => Application.Exit();
+        private void TrackProcessToolStripMenuItem1_Click(object sender, EventArgs e) => TrackProcess();
+        private void HideProcessToolStripMenuItem2_Click(object sender, EventArgs e) => HideProcess();
+        private void TrackProcessToolStripMenuItem_Click(object sender, EventArgs e) => TrackProcess();
+        private void HideProcessToolStripMenuItem_Click(object sender, EventArgs e) => HideProcess();
+        private void AboutToolStripMenuItem_Click(object sender, EventArgs e) => MessageBox.Show("Game Play Time v1.0\nCreated by @mojius on github :)", "About");
+        private void ShowHiddenProcessesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             form2 = new Form2();
             form2.Show();
-        }
-
-        private void fileToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            timer1.Stop();
-        }
-
-        private void fileToolStripMenuItem_DropDownClosed(object sender, EventArgs e)
-        {
-            timer1.Start();
-        }
-
-        private void processesToolStripMenuItem_DropDownClosed(object sender, EventArgs e)
-        {
-            timer1.Start();
-        }
-
-        private void processesToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
-        {
-            timer1.Stop();
-        }
-
-        private void fileToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
-        {
-            timer1.Stop();
-        }
-
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Show();
-        }
-
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
-        private void showOfflineToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void OpenTrackedProcessesFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -505,74 +475,30 @@ namespace GamePlayTime
             }    
         }
 
-        private void exitToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void RunOnStartupToolStripMenuItem_CheckStateChanged(object sender, EventArgs e)
         {
-            Application.Exit();
-        }
-
-        private void trackProcessToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            TrackProcess();
-        }
-
-        private void hideProcessToolStripMenuItem2_Click(object sender, EventArgs e)
-        {
-            HideProcess();
-        }
-
-        private void trackProcessToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            TrackProcess();
-        }
-
-        private void hideProcessToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            HideProcess();
-        }
-
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Game Play Time v1.0\nCreated by @mojius on github :)", "About");
-        }
-
-        private void runOnStartupToolStripMenuItem_CheckStateChanged(object sender, EventArgs e)
-        {
-            usrPrf_runOnStartUp = runOnStartupToolStripMenuItem.Checked;
+            UsrPrf_runOnStartUp = runOnStartupToolStripMenuItem.Checked;
 
             RegistryKey rk = Registry.CurrentUser.OpenSubKey
                 ("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
-            if (usrPrf_runOnStartUp ^ rk.GetValue("GamePlayTime") != null)
+            if (UsrPrf_runOnStartUp ^ rk.GetValue("GamePlayTime") != null)
                 rk.SetValue("GamePlayTime", Application.ExecutablePath);
             else
                 rk.DeleteValue("GamePlayTime", false);
         }
 
-        private void showOfflineToolStripMenuItem_CheckStateChanged(object sender, EventArgs e)
+        private void ShowOfflineToolStripMenuItem_CheckStateChanged(object sender, EventArgs e)
         {
-            usrPrf_showOfflineTrackedExecutables = showOfflineToolStripMenuItem.Checked;
+            UsrPrf_showOfflineTrackedExecutables = showOfflineToolStripMenuItem.Checked;
             RefreshAllWindows();
         }
 
-        private void viewActivityCalendarToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ViewActivityCalendarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             form3 = new Form3();
             form3.Show();
         }
 
-        private void Form1_SizeChanged(object sender, EventArgs e)
-        {
-            //AllProcessesBox.Size = new System.Drawing.Size(Size.Width - 30, Size.Height - 30);
-            //TrackedProcessesBox.Size = new System.Drawing.Size(Size.Width - 30, Size.Height - 30);
-        }
     }
 }
-
-//Figure out some async shit.
-//Have someone test the program. 
-//Optimize.
-//https://stackoverflow.com/questions/972039/is-there-a-system-event-when-processes-are-created
-
-//Make opening and closing all forms stop/start the timer, and get rid of the controls that close the context menu windows.
-//https://foxlearn.com/windows-forms/minimize-application-to-system-tray-in-csharp-523.html
-//https://stackoverflow.com/questions/995195/how-can-i-make-a-net-windows-forms-application-that-only-runs-in-the-system-tra
