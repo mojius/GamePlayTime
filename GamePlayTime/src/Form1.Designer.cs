@@ -30,7 +30,6 @@ namespace GamePlayTime
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.AllExecutableContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.trackProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hideProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -274,7 +273,6 @@ namespace GamePlayTime
             // 
             // notifyIcon1
             // 
-            this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "Game Play Time";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseClick);
@@ -405,7 +403,6 @@ namespace GamePlayTime
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.splitContainer2);
             this.Controls.Add(this.menuStrip1);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

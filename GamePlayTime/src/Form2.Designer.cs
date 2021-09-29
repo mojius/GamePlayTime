@@ -39,10 +39,10 @@ namespace GamePlayTime
             // HiddenProcessesBox
             // 
             this.HiddenProcessesBox.FormattingEnabled = true;
-            this.HiddenProcessesBox.ItemHeight = 16;
-            this.HiddenProcessesBox.Location = new System.Drawing.Point(12, 12);
+            this.HiddenProcessesBox.Location = new System.Drawing.Point(9, 10);
+            this.HiddenProcessesBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.HiddenProcessesBox.Name = "HiddenProcessesBox";
-            this.HiddenProcessesBox.Size = new System.Drawing.Size(314, 388);
+            this.HiddenProcessesBox.Size = new System.Drawing.Size(236, 316);
             this.HiddenProcessesBox.TabIndex = 0;
             this.HiddenProcessesBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.HiddenProcessesBox_MouseDown);
             // 
@@ -52,21 +52,22 @@ namespace GamePlayTime
             this.HiddenExecutableContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.unhideProcessToolStripMenuItem});
             this.HiddenExecutableContextMenuStrip.Name = "HiddenExecutableContextMenuStrip";
-            this.HiddenExecutableContextMenuStrip.Size = new System.Drawing.Size(179, 28);
+            this.HiddenExecutableContextMenuStrip.Size = new System.Drawing.Size(156, 26);
             // 
             // unhideProcessToolStripMenuItem
             // 
             this.unhideProcessToolStripMenuItem.Name = "unhideProcessToolStripMenuItem";
-            this.unhideProcessToolStripMenuItem.Size = new System.Drawing.Size(178, 24);
+            this.unhideProcessToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
             this.unhideProcessToolStripMenuItem.Text = "Unhide Process";
             this.unhideProcessToolStripMenuItem.Click += new System.EventHandler(this.unhideProcessToolStripMenuItem_Click);
             // 
             // Form2
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(338, 414);
+            this.ClientSize = new System.Drawing.Size(254, 336);
             this.Controls.Add(this.HiddenProcessesBox);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "Form2";
             this.ShowIcon = false;
             this.Text = "Hidden Processes";
