@@ -31,12 +31,10 @@ namespace GamePlayTime
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.AllProcessesBox = new System.Windows.Forms.ListBox();
             this.AllExecutableContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.trackProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hideProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.TrackedProcessesBox = new System.Windows.Forms.ListBox();
             this.TrackedExecutableContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.stopTrackingProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
@@ -63,28 +61,24 @@ namespace GamePlayTime
             this.showOfflineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenTrackedProcessFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.OpenHiddenProcessFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.AllProcessesBox = new System.Windows.Forms.ListBox();
+            this.TrackedProcessesBox = new System.Windows.Forms.ListBox();
+            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.AllExecutableContextMenuStrip.SuspendLayout();
             this.TrackedExecutableContextMenuStrip.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.notifyIconContextMenuStrip.SuspendLayout();
             this.TrackedExecutableContextMenuStrip2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
+            this.splitContainer2.Panel1.SuspendLayout();
+            this.splitContainer2.Panel2.SuspendLayout();
+            this.splitContainer2.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // AllProcessesBox
-            // 
-            this.AllProcessesBox.CausesValidation = false;
-            this.AllProcessesBox.FormattingEnabled = true;
-            this.AllProcessesBox.HorizontalScrollbar = true;
-            this.AllProcessesBox.Location = new System.Drawing.Point(10, 48);
-            this.AllProcessesBox.MaximumSize = new System.Drawing.Size(251, 316);
-            this.AllProcessesBox.MinimumSize = new System.Drawing.Size(251, 40);
-            this.AllProcessesBox.Name = "AllProcessesBox";
-            this.AllProcessesBox.Size = new System.Drawing.Size(251, 316);
-            this.AllProcessesBox.TabIndex = 0;
-            this.AllProcessesBox.TabStop = false;
-            this.AllProcessesBox.Leave += new System.EventHandler(this.AllProcessesBox_Leave);
-            this.AllProcessesBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listBox1_MouseDown);
             // 
             // AllExecutableContextMenuStrip
             // 
@@ -115,20 +109,6 @@ namespace GamePlayTime
             this.timer1.Interval = 10000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // TrackedProcessesBox
-            // 
-            this.TrackedProcessesBox.FormattingEnabled = true;
-            this.TrackedProcessesBox.HorizontalScrollbar = true;
-            this.TrackedProcessesBox.Location = new System.Drawing.Point(268, 48);
-            this.TrackedProcessesBox.MaximumSize = new System.Drawing.Size(251, 316);
-            this.TrackedProcessesBox.MinimumSize = new System.Drawing.Size(251, 40);
-            this.TrackedProcessesBox.Name = "TrackedProcessesBox";
-            this.TrackedProcessesBox.Size = new System.Drawing.Size(251, 316);
-            this.TrackedProcessesBox.TabIndex = 1;
-            this.TrackedProcessesBox.TabStop = false;
-            this.TrackedProcessesBox.Leave += new System.EventHandler(this.TrackedProcessesBox_Leave);
-            this.TrackedProcessesBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TrackedProcessesBox_MouseDown);
-            // 
             // TrackedExecutableContextMenuStrip
             // 
             this.TrackedExecutableContextMenuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -147,8 +127,9 @@ namespace GamePlayTime
             // label1
             // 
             this.label1.AutoSize = true;
+            this.label1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(7, 21);
+            this.label1.Location = new System.Drawing.Point(0, 4);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(83, 13);
@@ -158,8 +139,9 @@ namespace GamePlayTime
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(265, 21);
+            this.label2.Location = new System.Drawing.Point(0, 4);
             this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(116, 13);
@@ -174,10 +156,11 @@ namespace GamePlayTime
             this.processesToolStripMenuItem,
             this.helpToolStripMenuItem,
             this.viewToolStripMenuItem});
+            this.menuStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(530, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1056, 24);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -347,17 +330,81 @@ namespace GamePlayTime
             this.OpenHiddenProcessFileDialog.FileName = "hiddenexe.json";
             this.OpenHiddenProcessFileDialog.Title = "Open Hidden Processes File (.json)...";
             // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.IsSplitterFixed = true;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 41);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.AllProcessesBox);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.TrackedProcessesBox);
+            this.splitContainer1.Size = new System.Drawing.Size(1056, 518);
+            this.splitContainer1.SplitterDistance = 486;
+            this.splitContainer1.TabIndex = 6;
+            this.splitContainer1.TabStop = false;
+            // 
+            // AllProcessesBox
+            // 
+            this.AllProcessesBox.CausesValidation = false;
+            this.AllProcessesBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.AllProcessesBox.FormattingEnabled = true;
+            this.AllProcessesBox.HorizontalScrollbar = true;
+            this.AllProcessesBox.Location = new System.Drawing.Point(0, 0);
+            this.AllProcessesBox.Name = "AllProcessesBox";
+            this.AllProcessesBox.Size = new System.Drawing.Size(486, 518);
+            this.AllProcessesBox.TabIndex = 0;
+            this.AllProcessesBox.TabStop = false;
+            this.AllProcessesBox.Leave += new System.EventHandler(this.AllProcessesBox_Leave);
+            this.AllProcessesBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listBox1_MouseDown);
+            // 
+            // TrackedProcessesBox
+            // 
+            this.TrackedProcessesBox.CausesValidation = false;
+            this.TrackedProcessesBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.TrackedProcessesBox.FormattingEnabled = true;
+            this.TrackedProcessesBox.HorizontalScrollbar = true;
+            this.TrackedProcessesBox.Location = new System.Drawing.Point(0, 0);
+            this.TrackedProcessesBox.Name = "TrackedProcessesBox";
+            this.TrackedProcessesBox.Size = new System.Drawing.Size(566, 518);
+            this.TrackedProcessesBox.TabIndex = 1;
+            this.TrackedProcessesBox.TabStop = false;
+            this.TrackedProcessesBox.Leave += new System.EventHandler(this.TrackedProcessesBox_Leave);
+            this.TrackedProcessesBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TrackedProcessesBox_MouseDown);
+            // 
+            // splitContainer2
+            // 
+            this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Top;
+            this.splitContainer2.IsSplitterFixed = true;
+            this.splitContainer2.Location = new System.Drawing.Point(0, 24);
+            this.splitContainer2.Name = "splitContainer2";
+            // 
+            // splitContainer2.Panel1
+            // 
+            this.splitContainer2.Panel1.Controls.Add(this.label1);
+            // 
+            // splitContainer2.Panel2
+            // 
+            this.splitContainer2.Panel2.Controls.Add(this.label2);
+            this.splitContainer2.Size = new System.Drawing.Size(1056, 17);
+            this.splitContainer2.SplitterDistance = 486;
+            this.splitContainer2.TabIndex = 7;
+            this.splitContainer2.TabStop = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(530, 381);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
+            this.ClientSize = new System.Drawing.Size(1056, 559);
+            this.Controls.Add(this.splitContainer1);
+            this.Controls.Add(this.splitContainer2);
             this.Controls.Add(this.menuStrip1);
-            this.Controls.Add(this.TrackedProcessesBox);
-            this.Controls.Add(this.AllProcessesBox);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
@@ -366,23 +413,31 @@ namespace GamePlayTime
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.AllExecutableContextMenuStrip.ResumeLayout(false);
             this.TrackedExecutableContextMenuStrip.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.notifyIconContextMenuStrip.ResumeLayout(false);
             this.TrackedExecutableContextMenuStrip2.ResumeLayout(false);
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
+            this.splitContainer2.Panel1.ResumeLayout(false);
+            this.splitContainer2.Panel1.PerformLayout();
+            this.splitContainer2.Panel2.ResumeLayout(false);
+            this.splitContainer2.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
+            this.splitContainer2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.ListBox AllProcessesBox;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.ContextMenuStrip AllExecutableContextMenuStrip;
-        private System.Windows.Forms.ListBox TrackedProcessesBox;
         private System.Windows.Forms.ToolStripMenuItem hideProcessToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem trackProcessToolStripMenuItem;
         private System.Windows.Forms.Label label1;
@@ -397,7 +452,6 @@ namespace GamePlayTime
         private System.Windows.Forms.ToolStripMenuItem trackProcessToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem hideProcessToolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem showHiddenProcessesToolStripMenuItem;
-        private System.Windows.Forms.NotifyIcon notifyIcon1;
         private System.Windows.Forms.ContextMenuStrip notifyIconContextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
@@ -409,9 +463,13 @@ namespace GamePlayTime
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem runOnStartupToolStripMenuItem;
-        private System.Windows.Forms.ColorDialog colorDialog1;
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewActivityCalendarToolStripMenuItem;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.ListBox AllProcessesBox;
+        private System.Windows.Forms.ListBox TrackedProcessesBox;
+        private System.Windows.Forms.NotifyIcon notifyIcon1;
     }
 }
 

@@ -76,9 +76,8 @@ namespace GamePlayTime
             notifyIcon1.ContextMenuStrip = notifyIconContextMenuStrip;
             TrackedFileJsonPath = "trackedexe.json";
             HiddenFileJsonPath = "hiddenexe.json";
-            RegistryKey rk = Registry.CurrentUser.OpenSubKey
-                ("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
+            RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
             runOnStartupToolStripMenuItem.Checked = (rk.GetValue("GamePlayTime") != null);
 
             ReadFromJson(TrackedFileJsonPath, out TrackedExecutable);
@@ -123,20 +122,28 @@ namespace GamePlayTime
             {
                 for (int j = 0; j < TrackedExecutable.Count; j++)
                 {   
-                    //First try to match exe paths, then if that fails, try to match window titles
-                    if (TrackedExecutable[j].Path != "path not available")
+                    try
                     {
-                        if (AllExecutable[i].Path == TrackedExecutable[j].Path)
+                        //First try to match exe paths, then if that fails, try to match window titles
+                        if (TrackedExecutable[j].Path != "path not available")
+                        {
+                            if (AllExecutable[i].Path == TrackedExecutable[j].Path)
+                            {
+                                TrackedExecutable[j].Process = AllExecutable[i].Process;
+                                AllExecutable.RemoveAt(i);
+                            }
+                        }
+                        else if (AllExecutable[i].WindowTitle == TrackedExecutable[j].WindowTitle)
                         {
                             TrackedExecutable[j].Process = AllExecutable[i].Process;
                             AllExecutable.RemoveAt(i);
                         }
                     }
-                    else if (AllExecutable[i].WindowTitle == TrackedExecutable[j].WindowTitle)
+                    catch (ArgumentOutOfRangeException e)
                     {
-                        TrackedExecutable[j].Process = AllExecutable[i].Process;
-                        AllExecutable.RemoveAt(i);
+                        Console.WriteLine(e.Message);
                     }
+
                 }
             }
         }
@@ -178,14 +185,22 @@ namespace GamePlayTime
             {
                 if (tE.Process != null)
                 {
-                    //If the process has not exited, and the stopwatch hasn't started, then start it.
-                    if (!tE.Process.HasExited && !tE.session.IsRunning)
+                    //If the stopwatch hasn't started...
+                    //Has the process exited? If it has, then don't start the stopwatch.
+                    //If it hasn't, start the stopwatch.
+                    if (!tE.session.IsRunning)
                     {
-                        tE.session.Start();
+                        if (tE.Process.HasExited) continue;
+                        else tE.session.Start();
+                        return;
                     }
-                    else if (tE.Process.HasExited && tE.session.IsRunning)
+                    //If the stopwatch has started...
+                    //Has the process exited? if it has, then stop the stopwatch.
+                    //Update the keyvalue stuff.
+                    else if (tE.session.IsRunning)
                     {
-                        tE.session.Stop();
+                        if (tE.Process.HasExited) tE.session.Reset();
+                        
                         TimeSpan t = tE.session.Elapsed;
                         //Look for an existing key/value pair based on the current date and time. If there isn't one...
                         KeyValuePair<DateTime, TimeSpan> kvTime = tE.DateAndDuration.Find(kv => kv.Key.Date == DateTime.Today);
@@ -195,14 +210,15 @@ namespace GamePlayTime
                             tE.DateAndDuration.Add(new KeyValuePair<DateTime, TimeSpan>(DateTime.Today, t2));
                             tE.DateAndDuration.Remove(kvTime);
                         }
-                        else 
+                        else
                         {
                             //Add the current time to whatever's in the value of kvTime.
                             tE.DateAndDuration.Add(new KeyValuePair<DateTime, TimeSpan>(DateTime.Today, t));
                         }
-                        tE.session.Reset();
-                        LogToJson(TrackedFileJsonPath, TrackedExecutable);
+                        tE.session.Restart();
+                        
                     }
+
                 }
             }
         }
@@ -246,18 +262,13 @@ namespace GamePlayTime
                 }
                 catch
                 {
-                    if (cursorPointIndex == -1 && listBox == TrackedProcessesBox)
-                    {
-                        TrackedExecutableContextMenuStrip2.Show(MousePosition.X, MousePosition.Y);
-                    }
+                    if (cursorPointIndex == -1 && listBox == TrackedProcessesBox) TrackedExecutableContextMenuStrip2.Show(MousePosition.X, MousePosition.Y);
                 }
 
                 var focusedItem = listBox.SelectedItem;
 
-                if (focusedItem != null && listBox.SelectedIndex == cursorPointIndex && !(cursorPointIndex == -1) && listBox.SelectedIndex != -1)
-                {
-                    c.Show(Cursor.Position);
-                }
+                if (focusedItem != null && listBox.SelectedIndex == cursorPointIndex && !(cursorPointIndex == -1) && listBox.SelectedIndex != -1) c.Show(Cursor.Position);
+
             }
         }
 
@@ -283,15 +294,12 @@ namespace GamePlayTime
             if (e.CloseReason == CloseReason.UserClosing)
             {
                 e.Cancel = true;
+                Hide();
                 if (form2 != null)
                     form2.Hide();
-                Hide();
+                return;
             }
-        }
 
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            notifyIcon1.Visible = false;
             timer1.Stop();
             ProcessTimeCheck();
             LogToJson(TrackedFileJsonPath, TrackedExecutable);
@@ -299,11 +307,14 @@ namespace GamePlayTime
             notifyIcon1.Visible = false;
         }
 
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+
+        }
+
         private void Form1_Load(object sender, EventArgs e)
         {
-            //notifyIcon1.BalloonTipText = "Application Minimized.";
-            //notifyIcon1.BalloonTipTitle = "Game Play Time";
-            //notifyIcon1.ShowBalloonTip(2000);
+
         }
         
         private void notifyIcon1_MouseClick(object sender, MouseEventArgs e)
@@ -548,6 +559,12 @@ namespace GamePlayTime
             form3 = new Form3();
             form3.Show();
         }
+
+        private void Form1_SizeChanged(object sender, EventArgs e)
+        {
+            //AllProcessesBox.Size = new System.Drawing.Size(Size.Width - 30, Size.Height - 30);
+            //TrackedProcessesBox.Size = new System.Drawing.Size(Size.Width - 30, Size.Height - 30);
+        }
     }
 }
 
@@ -555,9 +572,6 @@ namespace GamePlayTime
 //Have someone test the program. 
 //Optimize.
 //https://stackoverflow.com/questions/972039/is-there-a-system-event-when-processes-are-created
-
-//LONGTERM
-//Make some kind of calendar to show the times.
 
 //Make opening and closing all forms stop/start the timer, and get rid of the controls that close the context menu windows.
 //https://foxlearn.com/windows-forms/minimize-application-to-system-tray-in-csharp-523.html
